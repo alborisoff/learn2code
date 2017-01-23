@@ -30,7 +30,7 @@ def one_crash_to_pre_geojson(onecrash):
             semantics[oneitem] = onecrash[oneitem]  # ..., то добавляем его в GeoJSON.
         else:
             semantics[oneitem] = ''  # Иначе записываем в это поле пустое значение.
-    onegeocrash["features"] = semantics   # Записываем сформированную семантику в поле features.
+    onegeocrash["properties"] = semantics   # Записываем сформированную семантику в поле features.
     return onegeocrash  # Возвращаем готовое описание объекта в формате GeoJSON
 
 
