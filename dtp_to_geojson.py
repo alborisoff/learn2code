@@ -3,48 +3,59 @@
 import json
 import os
 
-def jsontogeojson(filename):
-    geojson_crashes = []  # Объявляем массив для данных GeoJSON
-    json_crashes = json.loads(open(filename).read())  # Переменная для исходного JSON-файла
-    newfilename, extension = os.path.splitext(filename)  # Берём имя исходного файла...
-    geojsonfilename = newfilename + '.geojson'  # ...и прибавляем к нему новое расширение.
-    summary = {}  # Словарь для итогового GeoJSON-файла
-    for onecrash in json_crashes:  # Идём по исходному JSON-файлу, от происшествия к происшествию...
-        onegeocrash = {}  # Заводим словарь для одного GeoJSON-описания ДТП
-        properties = {}  # Заводим словарь для семантики
-        # Массив полей семантики, которые есть в исходном JSON и будут переведены в GeoJSON.
-        # Переведены будут не все поля.
-        items = [
-            "region_name",         # Субъект РФ
-            "place_path",          # Место происшествия
-            "em_moment_date",      # Дата происшествия
-            "em_moment_time",      # Время происшествия
-            "tr_area_state_name",  # Характер дорожного покрытия
-            "type",                # Тип ДТП
-            "light_type_name",     # Время суток
-            "num_of_vehicle",      # Количество транспортных средств
-            "num_of_victim",       # Суммарное количество пострадавших, если я правильно понимаю
-            "num_of_fatalities"    # Количество погибших
-                 ]
-        onegeocrash["type"] = "Feature"
-        # Переводим координаты из JSON в GeoJSON
-        onegeocrash["geometry"] = {"type": "Point",
-                                   "coordinates": [onecrash["geo_code"]["longitude"], onecrash["geo_code"]["latitude"]]}
-        # Переводим семантику в GeoJSON
-        for oneitem in items:
-            if oneitem in onecrash:  # Если это поле имеется в исходном JSON...
-                properties[oneitem] = onecrash[oneitem]  # ..., то добавляем его в наш GeoJSON с имеющимся значением...
-            else:
-                properties[oneitem] = ""  # ...иначе оставляем это поле незаполненным.
-        onegeocrash["properties"] = properties  # Заполняем ключ-значение для семантики
-        geojson_crashes.append(onegeocrash)  # Добавляем итоговое конвертированное происшествие в массив происшествий
-        # Формируем необходимые ключи-значения для итогового файла
-        summary["type"] = "FeatureCollection"
-        summary["features"] = geojson_crashes
-    # Сохраняем итоговый GeoJSON в файл
-    with open(geojsonfilename, "w") as ready_geojson:
-        json.dump(summary, ready_geojson)
-    return geojsonfilename
 
-filename = "crash_region_code_1124.json"
-print jsontogeojson(filename)
+def one_crash_to_pre_geojson(onecrash):
+    semantics = {}  # Заводим пустой словарь для семантики
+    # onegeocrash --- это описание одного объекта в формате GeoJSON. В дальнейшем эти описания будут собраны в массив.
+    onegeocrash = {"type": "Feature",
+                   "geometry": {"type": "Point",
+                                "coordinates": [onecrash["geo_code"]["longitude"],
+                                                onecrash["geo_code"]["latitude"]]}}
+    # Поля исходного JSON-файла, которые потом будут добавлены в семантику (features) объекта.
+    semantic_items = [
+                        "region_name",  # Субъект РФ
+                        "place_path",  # Место происшествия
+                        "em_moment_date",  # Дата происшествия
+                        "em_moment_time",  # Время происшествия
+                        "tr_area_state_name",  # Характер дорожного покрытия
+                        "type",  # Тип ДТП
+                        "light_type_name",  # Время суток
+                        "num_of_vehicle",  # Количество транспортных средств
+                        "num_of_victim",  # Суммарное количество пострадавших, если я правильно понимаю
+                        "num_of_fatalities"  # Количество погибших
+                     ]
+    # Добавляем семантику в GeoJSON.
+    for oneitem in semantic_items:  # Идём от одного поля исходного GeoJSON к другому.
+        if oneitem in onecrash:  # Если это поле есть в исходном файле...
+            semantics[oneitem] = onecrash[oneitem]  # ..., то добавляем его в GeoJSON.
+        else:
+            semantics[oneitem] = ''  # Иначе записываем в это поле пустое значение.
+    onegeocrash["features"] = semantics   # Записываем сформированную семантику в поле features.
+    return onegeocrash  # Возвращаем готовое описание объекта в формате GeoJSON
+
+
+def iterjson_to_geojson(filename):
+    newfilename, extension = os.path.splitext(filename)  # Берём имя исходного JSON-файла...
+    geojsonfilename = newfilename + '.geojson'  # ...и прибавляем к нему новое расширение.
+    geojson_data = []  # Массив для данных GeoJSON (описаний отдельно взятых объектов).
+    ready_geojson = {"type": "FeatureCollection"}  # Заводим словарь для итогового GeoJSON.
+    with open(filename, 'r') as json_file:  # Открываем исходный файл.
+        for onecrash in json_file:  # Идём по строкам.
+            one_json_line = json.loads(onecrash)  # Каждую строку записываем как JSON-файл.
+            one_geojson_line = one_crash_to_pre_geojson(one_json_line)  # Переводим этот JSON в формат GeoJSON.
+            geojson_data.append(one_geojson_line)  # Добавляем в массив описаний объектов.
+    ready_geojson["features"] = geojson_data  # Записываем полученный массив в поле features готового GeoJSON.
+    with open(geojsonfilename, "w") as ready_file:
+        json.dump(ready_geojson, ready_file)  # Сохраняем готовый GeoJSON в файл.
+    return geojsonfilename  # Возвращаем имя готового GeoJSON.
+
+
+# Пусть данный скрипт переводит в GeoJSON все JSON-файлы, которые находятся в той же папке, что и он сам.
+for onejsonfile in os.listdir('.'):
+    filename, extension = os.path.splitext(onejsonfile)
+    if extension == '.json':
+        try:
+            iterjson_to_geojson(onejsonfile)
+            print filename, 'конвертирован в', iterjson_to_geojson(onejsonfile)
+        except:
+            print 'Ой, что-то пошло не так...'
