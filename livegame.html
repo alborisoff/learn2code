@@ -8,12 +8,16 @@
         <!-- 
         <button id="evolstep" onclick="evolstep()" disabled>Шаг эволюции</button>
         -->
+        <br>
+        <hr>
+        <br>
+        
     </body>
     <script language="javascript">
         // Получаем желаемый размер игрового поля. Для упрощения сделаем поле квадратным, 
         // так что достаточно одного значения стороны.
         function getsize() {
-            for(;;) {
+            for(;;) {  // Просто крутим замкнутый цикл. Единственный способ покинуть цикл - ввести правильное значение!
                 var flds=prompt("Введите количество полей (от 10 до 20 включительно)", "10");
                 if (isNaN(flds)) {
                     alert("Вы ввели не число!");
@@ -38,13 +42,38 @@
                 
         // Создаём игровое поле в виде таблицы.
         function create() {
-            var fsize = getsize()
-            alert(getid(1, 1));
-            for (var i = 0; i < fsize; i++) {
-                for (var j = 0; j < fsize; j++) {
-                    document.write(getid(i, j) + "\n");
+            var fieldsize = getsize();
+            var body = document.getElementsByTagName("body")[0];
+            var gamefield = document.createElement("table");
+            var gamebody = document.createElement("tbody");
+            for (var i = 0; i < fieldsize; i++) {
+                var row = document.createElement("tr");
+                for (var j = 0; j < fieldsize; j++) {
+                    var gamecell = document.createElement("td");
+                    var celladdress = document.createTextNode(getid(i, j));
+                    gamecell.setAttribute("id", celladdress);
+                    gamecell.style.backgroundcolor = "#00FFFF";
+                    gamecell.style.height = "10";
+                    gamecell.style.width = "10";
+                    gamecell.appendChild(celladdress);
+                    row.appendChild(gamecell);
                 }
+                // add the row to the end of the table body
+                gamebody.appendChild(row);
             }
+             // put the <tbody> in the <table>
+            gamefield.appendChild(gamebody);
+            // appends <table> into <body>
+            body.appendChild(gamefield);
+            // sets the border attribute of tbl to 2;
+            var tablesize = ((fieldsize*10).toString()).concat("px");
+            alert(tablesize);
+            gamefield.setAttribute("border", "1");
+            gamefield.setAttribute("bordercolor", "#00FFFF");
+            gamefield.setAttribute("height", tablesize);
+            gamefield.setAttribute("width", tablesize);
         }
+        
+        
     </script>
 </html>
