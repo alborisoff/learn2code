@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>УЧИТЬСЯ УЧИТЬСЯ УЧИТЬСЯ</title>
+    </head>
+    <body>
+        <button id="createfield" onclick="create()">Создать игровое поле</button>
+        <!-- 
+        <button id="evolstep" onclick="evolstep()" disabled>Шаг эволюции</button>
+        -->
+    </body>
+    <script language="javascript">
+        // Получаем желаемый размер игрового поля. Для упрощения сделаем поле квадратным, 
+        // так что достаточно одного значения стороны.
+        function getsize() {
+            for(;;) {
+                var flds=prompt("Введите количество полей (от 10 до 20 включительно)", "10");
+                if (isNaN(flds)) {
+                    alert("Вы ввели не число!");
+                } else
+                { 
+                    if (parseInt(flds) >= 10 && parseInt(flds) <=20) {
+                        return parseInt(flds);
+                        break;
+                    } else {
+                        alert("Вы ввели число менее 10 или больше 20!");
+                    }
+                }
+            }
+        }
+
+        // Создаём id для каждого поля таблицы
+        function getid(nrow, ncol) { 
+            srow = (nrow.toString().length == 2) ? nrow.toString() : "0".concat(nrow.toString());
+            scol = (ncol.toString().length == 2) ? ncol.toString() : "0".concat(ncol.toString());
+            return srow.concat(scol);
+        }
+                
+        // Создаём игровое поле в виде таблицы.
+        function create() {
+            var fsize = getsize()
+            alert(getid(1, 1));
+            for (var i = 0; i < fsize; i++) {
+                for (var j = 0; j < fsize; j++) {
+                    document.write(getid(i, j) + "\n");
+                }
+            }
+        }
+    </script>
+</html>
