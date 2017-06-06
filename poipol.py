@@ -1,78 +1,45 @@
 # -*- coding: utf-8 -*-
 
-def  gabarits(arrofpoints):
-
-    # Получив на входе массив углов многоугольника, выдаём координаты габаритного прямоугольника,
-    # в который вписан входной многоугольник.
-    # Массив точек имеет вид [[x1, y1], [x2, y2], ...,  [[xn, yn]]]
-    # Очевидно, что нам нужно найти как минимальные, так и максимальные x и y.
-    minx = 0
-    maxx = arrofpoints[0][0]
-    miny = 0
-    maxy = arrofpoints[0][1]
-    for i in range(0, len(arrofpoints)):
-        for j in range(i, len(arrofpoints)):
-            if minx > arrofpoints[j][0]:
-                minx = arrofpoints[j][0]
-            if maxx < arrofpoints[j][0]:
-                maxx = arrofpoints[j][0]
-            if miny > arrofpoints[j][1]:
-                miny = arrofpoints[j][1]
-            if maxy < arrofpoints[j][1]:
-                maxy = arrofpoints[j][1]
-    return minx, maxx, miny, maxy
+polygon = [[3, 2],
+           [8, 7],
+           [12, 8],
+           [8, 12],
+           [3, 10],
+           [6, 7],
+           [3, 2]]
+point = [8, 10]
 
 
-def intersect(segment1, segment2):  # Координаты пересечения двух прямых, проходящих через две точки каждая
-
-    x11 = segment1[0][0]
-    y11 = segment1[0][1]
-    x12 = segment1[1][0]
-    y12 = segment1[1][1]
-
-    x21 = segment2[0][0]
-    y21 = segment2[0][1]
-    x22 = segment2[1][0]
-    y22 = segment2[1][1]
-
-    a1 = y11 - y12
-    b1 = x12 - x11
-    c1 = x11*y12 - x12*y11
-
-    a2 = y21 - y22
-    b2 = x22 - x21
-    c2 = x21*y22 - x22*y21
-
-    y = (a2*c1 - a1*c2) / (a1*b2 - a2*b1)
-    x = (-c1 - b1*y) / a1
-
-    return x, y
+def bbox(poly):  # Получаем баунд-бокс обрезающего полигона
+    xs, ys = [], []
+    for poi in poly:
+        xs.append(poi[0])
+        ys.append(poi[1])
+    return [min(xs), max(xs), min(ys), max(ys)]
 
 
-def ispointonsegment(segment, point):  # Проверка: находится ли входная точка на входном отрезке?
-
-    x1, y1, x2, y2 = segment[0][0], segment[0][1], segment[1][0], segment[1][1]
-    xp, yp = point[0], point[1]
-
-    # Простейший вариант -- вдруг входная точка совпадает с одним из концов отрезков!
-    if (xp == x1 and yp == y1) or (xp == x2 and yp == y2):
-        return True
-    else:
-        p = (xp - x2)/(x1 - x2)
-        if p < 0 or p > 1:  # Думаю, тут сразу всё ясно, условие не соблюдено
-            return False
-        else:
-            return p == (yp - y2)/(y1 - y2)  # Последняя проверка
-
-# Проверка: пересекаются ли отрезки? Проверяем угловые коэффициенты (с учётом возможной параллельности оси OY!),
-# а потом нахождение точки пересечения на обоих отрезках сразу.
-def aresegmentsintersects(segment1, segment2):
-    pass
+def intersectwithnormal(normal, edge):  # Здесь частный случай: ребро полигона пересекается с перпендикуляром к оси OX.
+    xe1, ye1, xe2, ye2 = edge[0][0], edge[0][1], edge[1][0], edge[1][1]
+    xn1, yn1, xn2, yn2 = normal[0][0], normal[0][1], normal[1][0], normal[1][1]
+    xintersect = xn1  # Очевидно, что точка пересечения с перпендикуляром к оси OX будет иметь абсциссу перпендикуляра.
+    # Остаётся только найти ординату точки пересечения.
+    k = (ye2 - ye1) / (xe2 - xe1)
+    b = ye1 - k*xe1
+    yintersect = k*xintersect + b
+    return [xintersect, yintersect]
 
 
+def intersects(poly, poi):
+    ints = []
+    normal = [[poi[0], bbox(poly)[2]], [poi[0], bbox(poly)[3]]]
+    for i in range(len(poly) - 1):
+        edge = [poly[i], poly[i + 1]]
+        xe1, ye1, xe2, ye2 = edge[0][0], edge[0][1], edge[1][0], edge[1][1]
+        xn1, yn1, xn2, yn2 = normal[0][0], normal[0][1], normal[1][0], normal[1][1]
+        if min(xe1, xe2) <= xn1 <= max(xe1, xe2):
+            ints.append(intersectwithnormal(normal, edge))
+    return ints
 
 
-
-
-
-
+print "Intersects:"
+print intersects(polygon, point)
