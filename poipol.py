@@ -35,20 +35,20 @@ def intersectwithnormal(normal, edge):
 
 
 # На входе - координаты точки и концов отрезка. Проверяем, лежит ли точка на отрезке.
-def pointonsegment(point, segment):
-    xp, yp = point[0], point[1]
+def pointonsegment(poi, segment):
+    xp, yp = poi[0], poi[1]
     xs1, ys1, xs2, ys2 = segment[0][0], segment[0][1], segment[1][0], segment[1][1]
-    if xp == xs1 == xs2:  # Если абсциссы отрезка и точки совпадают...
-        return min(ys1, ys2) <= yp <= max(ys1, ys2)  # ..., то проверяем, находится ли ордината точки между концами
+    if xs1 == xs2:  # Если абсциссы отрезка и точки совпадают...
+        return (xs1 == xp) and (min(ys1, ys2) <= yp <= max(ys1, ys2))
+    elif ys1 == ys2:  # Если ординаты отрезка и точки совпадают...
+        return (yp == ys1) and (min(xs1, xs2) <= xp <= max(xs1, xs2))
     # Предусмотрим ещё случай, когда точка совпадает с одним из концов отрезка
-    elif (xp == xs1 and yp == xs2) or (xp == xs2 and xp == ys2):
+    elif (xp == xs1 and yp == ys2) or (xp == xs2 and yp == ys2):
         return True
-    else:
+    else:  # Частные случаи не срабатывают, берём общий случай
         p = (xp - xs2) / (xs1 - xs2)
         if 0 <= p <= 1:
             return p == (yp - ys2) / (ys1 - ys2)
-
-
 
 
 # На входе - координаты полигона (то есть, координаты углов; координаты первой и последней точек совпадают)
@@ -73,6 +73,11 @@ def intersects(poly, poi):
             else:  # Функция пересечения секущего отрезка с ребром уже есть.
                 intersections.append(intersectwithnormal(normal, edge))
     return intersections
+
+
+def poiinpoly(poi, poly):
+
+    
 
 
 print "Intersects:"
