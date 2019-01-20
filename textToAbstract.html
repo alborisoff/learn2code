@@ -1,0 +1,148 @@
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Текст в картинку</title>
+		
+		<!-- Link to hash generator -->
+		<script src="http://cdn.jsdelivr.net/gh/emn178/js-sha256/build/sha256.min.js" 
+				type="application/javascript">
+		</script>
+	</head>
+	<style type="text/css">
+		.mainBlock 
+		{
+			position: fixed;
+			text-align: center;
+			width: 80%;
+			top: 10%;
+			left: 50%;
+			transform: translate(-50%, 0);
+		}
+		.textToHash
+		{
+			width: 80%
+		}
+	</style>
+	<body>
+		<div class="mainBlock">
+			<h1 align="center">Шестнадцать оттенков синего</h1>
+			<!-- This code was typed by our cat	<p7y555555555555555555555666666666666666666666999999999999999998888888888
+			99999999999999iiiiiiiiic3ek >
+			-->
+			<h2 align="left">
+				<ol>
+					<li>Введите любой текст
+					<li>Нажмите кнопку "Generate"
+					<li>Получите абстрактную картинку в оттенках синего на основе своего текста!
+				</ol>
+			</h2>
+			<p>
+			<textarea name="textToHash" id="textToHash" cols="80" rows="6"></textarea>
+			<p>
+			<button name="getHash" onclick="getHash()">Generate!</button>
+			<p>
+			<canvas id="myCanvas" width="256" height="256" style="border:1px solid #d3d3d3;">
+		</div>
+		<script>
+			var hashLetterToColor = function(hashLetter)
+			{
+				switch (hashLetter) {
+					case "0":
+						return "#25a38d";
+					case "1":
+						return "#2dc3a9";
+					case "2":
+						return "#44d4bb";
+					case "3":
+						return "#64dcc6";
+					case "4":
+						return "#257ea3";
+					case "5":
+						return "#2d97c3";
+					case "6":
+						return "#44aad4";
+					case "7":
+						return "#64b8dd";
+					case "8":
+						return "#2c50c4";
+					case "9":
+						return "#4466d4";
+					case "a":
+						return "#6480dd";
+					case "b":
+						return "#849ae4";
+					case "c":
+						return "#4325a3";	
+					case "d":
+						return "#502dc3";
+					case "e":
+						return "#8165db";
+					case "f":
+						return "#b5a5eb";
+				}	
+			}
+
+			var hashToColors = function(hashString)
+			{
+				var colorsArr = [];
+				for (var i = 0; i < hashString.length; i++) {
+					colorsArr.push(hashLetterToColor(hashString[i]));
+				}
+				return colorsArr;
+			}
+
+			var arrToMatrix = function(inArr)
+			{
+				var readyMatrix = [];
+				for (var i = 0; i < 64; i = i + 8) {
+					readyMatrix.push([
+						inArr[i],
+						inArr[i + 1],
+						inArr[i + 2],
+						inArr[i + 3],
+						inArr[i + 4],
+						inArr[i + 5],
+						inArr[i + 6],
+						inArr[i + 7]
+					]);
+				}
+				return readyMatrix;
+			}
+
+			function getHash()
+			{
+				var textToHash = document.getElementById("textToHash").value;
+				var myHash = sha256(textToHash);
+				var myColouredHash = hashToColors(myHash);
+				var myColouredMatrix = arrToMatrix(myColouredHash);
+				var c = document.getElementById("myCanvas");
+
+				var ctx = c.getContext("2d");
+				var barH = 32; 
+				var crX, crY
+			 
+				for (var i = 0; i < myColouredMatrix.length; i++) {
+					for (var j = 0; j < myColouredMatrix[0].length; j++) {
+						ctx.beginPath();
+						crX = i * barH;
+						crY = j * barH;
+						ctx.rect(crX, crY, barH, barH);
+						ctx.fillStyle = myColouredMatrix[i][j];
+						ctx.fill();
+					}
+				}
+			}
+
+		</script>
+	</body>
+	
+</html>
+
+
+
+<!--
+
+https://raw.githubusercontent.com/emn178/js-sha256/master/build/sha256.min.js
+http://raw.githubusercontent.com/<username>/<repo>/<branch>/path/to/file.js
+http://cdn.jsdelivr.net/gh/emn178/js-sha256/build/sha256.min.js
+-->
